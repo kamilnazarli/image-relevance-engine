@@ -15,7 +15,63 @@
 Outputs below 0.70 confidence trigger an automated flag for review instead of ingestion into the matching pool.
 
 ## Matching Pipeline & Mismatch Guard Strategy
-
+┌─────────────────────┐
+│   IMAGE INGESTION   │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│    VISION MODEL     │
+│  Caption + Category │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│  SCHEMA VALIDATION  │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│    EMBED CAPTION    │
+└──────────┬──────────┘
+           │
+           ▼
+     ┌──────────────┐
+     │ VECTOR STORE │
+     └───────┬──────┘
+             │
+             │
+             ▼
+┌─────────────────────┐       ┌─────────────────────┐
+│    POST CREATION    │──────▶│   EMBED CONTENT     │
+└─────────────────────┘       └──────────┬──────────┘
+                                         │
+                                         ▼
+                              ┌─────────────────────┐
+                              │ COSINE SIMILARITY   │
+                              │      RANKING        │
+                              └──────────┬──────────┘
+                                         │
+                                         ▼
+                              ┌─────────────────────┐
+                              │    MISMATCH GUARD   │
+                              └──────────┬──────────┘
+                                         │
+                           ┌─────────────┼─────────────┐
+                           │             │             │
+                           ▼             ▼             ▼
+                    Category Match?  Similarity ≥   Confidence
+                                    Threshold?       Verified?
+                           │             │             │
+                           └─────────────┼─────────────┘
+                                         │
+                              ┌──────────┴──────────┐
+                              │                     │
+                              ▼                     ▼
+                    ┌─────────────────┐   ┌────────────────────────┐
+                    │ PASS            │   │ FAIL                   │
+                    │ Return Match    │   │ Refusal + Human Reason │
+                    └─────────────────┘   └────────────────────────┘
 
 ## Explicit Non-Goals
 - **No Full Frontend UI:** The system will not provide an interactive client web app, React build, or complex CSS interface. Endpoints and basic API payloads serve as the operational interface.
