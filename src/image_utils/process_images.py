@@ -14,10 +14,11 @@ def analyze_images():
                         password=os.getenv("DB_PASSWORD")) as conn:
         
         with conn.cursor() as cur:
+            conn.commit()
             res = cur.execute("""SELECT * FROM images
                                 WHERE id NOT IN (SELECT image_id FROM image_metadata);
                                 """)
-            print("Got result")
+            print("Got images")
             for image in res.fetchall():
                 print(image)
                 image_analysis, usage = analyze_image(image[1])
@@ -29,24 +30,26 @@ def analyze_images():
                 attributes, caption = image_analysis.attributes, image_analysis.caption
                 image_id, confidence = image[0], image_analysis.confidence
 
-                if confidence < 70:
+                if confidence < 0.7:
                     status = "flagged_low_confidence"
                     cur.execute("""
                         INSERT INTO image_metadata (image_id, subject, category, attributes,
                                                     caption, confidence, status)
                         VALUES (%s, %s, %s, %s, %s, %s, %s);""",
                         (image_id, subject, category, json.dumps(attributes), caption, confidence, status))
+                    conn.commit()
+
                 else:
                     # the default is already 'approved' in table
 
                     cur.execute("""
                         INSERT INTO image_metadata (image_id, subject, category, attributes,
-                                                    caption, confidence),
+                                                    caption, confidence)
                         VALUES (%s, %s, %s, %s, %s, %s);""",
                         (image_id, subject, category, json.dumps(attributes), caption, confidence))
+                    conn.commit()
 
                 #  !!! FILL THE AI_COST_LOGS TABLE TOO
-            conn.commit()
 
 if __name__ == "__main__":
     analyze_images()

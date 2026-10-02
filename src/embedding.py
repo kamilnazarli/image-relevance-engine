@@ -6,18 +6,28 @@ import psycopg
 load_dotenv()
 
 def process_embedding(id, entity_type, embedding_vector):
+    """
+        Inserting an individual embedding to the table
+    """
+
     with psycopg.connect(host=os.getenv("DB_HOST"),
-                            port=os.getenv("DB_PORT", 5432),
-                            dbname=os.getenv("DB_NAME"),
-                            user=os.getenv("DB_USER"),
-                            password=os.getenv("DB_PASSWORD")) as conn:
+                         port=os.getenv("DB_PORT", 5432),
+                         dbname=os.getenv("DB_NAME"),
+                         user=os.getenv("DB_USER"),
+                         password=os.getenv("DB_PASSWORD")) as conn:
         with conn.cursor() as cur:
-            cur.execute("""INSERT INTO TABLE embeddings VALUES (%s, %s, %s)""",
+            cur.execute("""INSERT INTO embeddings (entity_id, entity_type, embedding_vector)
+                            VALUES (%s, %s, %s)
+                            ON CONFLICT (entity_id, entity_type) DO UPDATE
+                            SET embedding_vector = EXCLUDED.embedding_vector;""",
                         (id, entity_type, embedding_vector))
             conn.commit()
 
 
 def get_embedding(input):
+    """
+        Receiving embedding from embedding model
+    """
 
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 

@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+from typing import Optional
 
 from sqlalchemy import create_engine, text, inspect
 from sqlalchemy import Integer
@@ -44,7 +45,7 @@ class Embeddings(Base):
     __tablename__ = "embeddings"
 
     id = mapped_column(Integer, primary_key=True)
-    entity_id: Mapped[int] = mapped_column(Integer, index=True)
+    entity_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
     entity_type: Mapped[str]
     embedding_vector = mapped_column(ARRAY(Float))
 
@@ -52,7 +53,7 @@ class Post(Base):
     __tablename__ = "posts"
 
     id = mapped_column(Integer, primary_key=True)
-    title: Mapped[str]
+    title: Mapped[str] = mapped_column(String, unique=True)
     content: Mapped[str] = mapped_column(Text)
     target_subject: Mapped[str]
 
@@ -67,7 +68,19 @@ class AiCostLogs(Base):
     cost_usd: Mapped[float]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
+class MatchReviews(Base):
+    __tablename__ = "match_reviews"
+
+    id = mapped_column(Integer, primary_key=True)
+    image_id : Mapped[Optional[int]] = mapped_column(ForeignKey("images.id"), unique=True)
+    post_id: Mapped[int] = mapped_column(Integer, index=True)
+    status: Mapped[str] = mapped_column(default="approved")
+    similarity_score: Mapped[Optional[float]]
+    notes: Mapped[list[str]] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
 load_dotenv()
+
 DB_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DB_URL)

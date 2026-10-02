@@ -24,13 +24,36 @@ async def get_post(post: Post):
                         user=os.getenv("DB_USER"),
                         password=os.getenv("DB_PASSWORD")) as conn:
         with conn.cursor() as cur:
-            post_id = cur.execute("""INSERT INTO TABLE posts VALUES (%s, %s, %s) RETURNING id;""",
-                                (post.title, post.content, post.target_subject))
+            cur.execute("""INSERT INTO posts (title, content, target_subject)
+                           VALUES (%s, %s, %s)
+                           ON CONFLICT (title) DO UPDATE
+                           SET title = EXCLUDED.title
+                           RETURNING id;""",
+                           (post.title, post.content, post.target_subject))
+            post_id = cur.fetchone()[0]
+
+            # !!! Problem! whenever the post already exists in table it will fail here
+            
+            print(f"Post id: {post_id}")
+            conn.commit()
+            input = f"Subject: {post.target_subject}\nTitle: {post.title}\nDescription: {post.content}"
+            post_embedding = get_embedding(input)
+            process_embedding(post_id, "post", post_embedding)
+
+            top_metadata, sorted_similarity_scores = get_most_similar_images(post_id)
+            post_id, img_id, top_candidate_img_id, similarity_score, status, reason = (
+                mismatch_guard(post_id, top_metadata, sorted_similarity_scores))
+
+            if img_id is None:
+                return reason
+
+            cur.execute("""SELECT (file_path, source_url) FROM images WHERE id = %s""",
+                            (img_id,))
             conn.commit()
 
-    input = post.title + "\n\n" + post.content
-    post_embedding = get_embedding(input)
-    process_embedding(post_id, "post", post_embedding)
+            recommended_file_path, recommended_img_url = cur.fetchone()[0]
 
-    top_metadata, sorted_similarity_scores = get_most_similar_images(post_id)
-    mismatch_guard(post_id, top_metadata, sorted_similarity_scores)
+
+            return f"""Recommended image file path: {recommended_file_path}, 
+                       source_url: {recommended_img_url}. 
+                       {reason}"""
