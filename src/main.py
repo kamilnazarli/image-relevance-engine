@@ -36,6 +36,7 @@ async def get_post(post: Post):
             
             print(f"Post id: {post_id}")
             conn.commit()
+
             input = f"Subject: {post.target_subject}\nTitle: {post.title}\nDescription: {post.content}"
             post_embedding = get_embedding(input)
             process_embedding(post_id, "post", post_embedding)

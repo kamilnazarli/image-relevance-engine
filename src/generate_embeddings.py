@@ -28,8 +28,9 @@ def process_embeddings():
                 image_id = image[1]
                 caption = image[5]
                 attributes = image[4] # Optionally to convert attributes to embedding
-    
-                input = caption + "\n\n" + str(attributes) # input turn to embedding
+
+                # input turn to embedding
+                input = f"Subject: {image[3]}\nTitle: {image[1]}\nDescription: {image[2]}" 
                 image_embedding = get_embedding(input)
     
                 # Put the embedding into the table
@@ -45,7 +46,6 @@ def process_embeddings():
             
                 post_id = post[0]
     
-                input = post[1] + "\n\n" + post[2]
                 input = f"Subject: {post[3]}\nTitle: {post[1]}\nDescription: {post[2]}"
 
                 post_embedding = get_embedding(input)

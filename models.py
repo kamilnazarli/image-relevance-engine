@@ -72,7 +72,7 @@ class MatchReviews(Base):
     __tablename__ = "match_reviews"
 
     id = mapped_column(Integer, primary_key=True)
-    image_id : Mapped[Optional[int]] = mapped_column(ForeignKey("images.id"), unique=True)
+    image_id : Mapped[Optional[int]] = mapped_column(ForeignKey("images.id"), index=True)
     post_id: Mapped[int] = mapped_column(Integer, index=True)
     status: Mapped[str] = mapped_column(default="approved")
     similarity_score: Mapped[Optional[float]]
