@@ -14,10 +14,10 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return { "name": "Task API", "version": "1.0", "endpoints": ""}
+    return { "name": "Task API", "version": "1.0", "endpoints": "recommendation"}
 
-@app.post("/posts")
-async def get_post(post: Post):
+@app.post("/recommendation")
+async def get_recommendation(post: Post):
     with psycopg.connect(host=os.getenv("DB_HOST"),
                         port=os.getenv("DB_PORT", 5432),
                         dbname=os.getenv("DB_NAME"),

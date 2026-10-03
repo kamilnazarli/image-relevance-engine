@@ -7,7 +7,13 @@ class ImageAnaylsisResult(BaseModel):
     caption: str
     confidence: float = Field(ge=0, le=1.0)
 
+
 class Post(BaseModel):
     title: str
     content: str
     target_subject: str
+
+
+class GuardDecision(BaseModel):
+    approved: bool
+    reason: str
