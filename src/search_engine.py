@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 import os
 import json
 from google import genai
+from google.genai import types
 import re
+from .schemas import GuardDecision
 
 load_dotenv()
 
@@ -18,6 +20,8 @@ SYSTEM_PROMPT = """
     2. Domain check: If the post is technical or editorial (e.g., database indexing, software
     watchdog), REJECT any literal animal photos. Metaphors do not qualify for literal images.
     3. Setting: Domestic indoor pets wearing clothes must not represent wild nature posts.
+    4. Missing/invalid data: If post details(target subject, title content) are missing or
+    generic placeholders, you MUST SET "approved": false.
 
     Return a JSON object matching this structure:
     {
@@ -37,7 +41,11 @@ def clean_json_response(raw_output):
     return text.strip()
 
 def llm_guard(post_data, img_data):
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    client = genai.Client(
+        api_key=os.getenv("GEMINI_API_KEY"),
+        http_options=types.HttpOptions(
+            timeout=15_000
+        ))
 
     PROMPT = f"""
         POST DETAILS:
@@ -54,16 +62,20 @@ def llm_guard(post_data, img_data):
 """
     try:
         interaction = client.interactions.create(
-            model="gemini-2.5-flash",
+            model="gemini-3.8-flash",
             system_instruction=SYSTEM_PROMPT,
             input=PROMPT,
             response_format={
                 "type": "text",
-                "mime_type": "application/json"
+                "mime_type": "application/json",
+                "schema": GuardDecision.model_json_schema()
             }
         )
+        print(interaction.output_text)
         clean_response = clean_json_response(interaction.output_text)
+        print(clean_response)
         return json.loads(clean_response)
+
     except Exception as e:
         # if LLM check fails
         return {
