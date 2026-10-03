@@ -277,7 +277,7 @@ ON CONFLICT (entity_id, entity_type) DO UPDATE
 
    * Similarity `>= 0.40`
    * Vision confidence `>= 0.70`
-4. Evaluates candidates sequentially through `call_llm_guard()`.
+4. Evaluates candidates sequentially through `llm_guard()`.
 5. Enforces the Pydantic `GuardDecision` schema to guarantee valid structured output.
 6. The guard evaluates:
 
@@ -306,13 +306,17 @@ ON CONFLICT (entity_id, entity_type) DO UPDATE
 The Image Relevance Engine is built around four primary principles:
 
 1. **High recall before reasoning**
+
    Vector search should retrieve plausible candidates without being overly restrictive.
 
 2. **High precision before approval**
+
    Semantic similarity alone is insufficient for final image selection.
 
 3. **Fail closed**
+
    Uncertainty, missing information, API failures, and insufficient evidence should result in rejection rather than an arbitrary image.
 
 4. **Auditability**
+
    Every evaluation should produce structured records containing the candidate, similarity score, decision, and rationale.
