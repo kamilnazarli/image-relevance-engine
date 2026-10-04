@@ -31,8 +31,6 @@ async def get_recommendation(post: Post):
                            RETURNING id;""",
                            (post.title, post.content, post.target_subject))
             post_id = cur.fetchone()[0]
-
-            # !!! Problem! whenever the post already exists in table it will fail here
             
             print(f"Post id: {post_id}")
             conn.commit()

@@ -9,6 +9,7 @@ from groq import Groq
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+from src.log_ai_usage import log_cost
 
 
 
@@ -19,6 +20,8 @@ SYSTEM_PROMPT = """
     Keep captions concise (under 30 words) and attribute tags to short 1-2 word descriptors.
     Be direct and do not include conversational preamble or markdown code blocks.
 """
+
+MODEL_NAME = "gemini-2.5-flash"
 
 def llm_default_response():
 
@@ -52,7 +55,7 @@ def analyze_image(image_path):
             ))
 
         interaction = client.interactions.create(
-            model="gemini-3.8-flash",
+            model=MODEL_NAME,
             input=[
                 {
                     "type": "text", "text": SYSTEM_PROMPT
@@ -69,8 +72,13 @@ def analyze_image(image_path):
                     "schema": ImageAnaylsisResult.model_json_schema()
             }
         )
+        usage = interaction.usage
+
+        log_cost(usage, MODEL_NAME, "image_analysis")
+
+    
         return (ImageAnaylsisResult.model_validate_json(interaction.output_text),
-                interaction.usage)
+                usage)
 
     except Exception as e:
         print("Fall to exception block, change to GROQ")
@@ -106,10 +114,14 @@ def analyze_image(image_path):
             max_tokens=500
 
         )
-        return (ImageAnaylsisResult.model_validate_json(completion.choices[0].message.content),
-                        completion.usage)
+        usage = completion.usage
+        output = completion.choices[0].message.content
+
+        return (ImageAnaylsisResult.model_validate_json(output),
+                usage)
+
     except:
-        return llm_default_response(), " "
+        return llm_default_response(), None
 
 
 

@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 import psycopg
 
+from .log_ai_usage import log_cost
+
 load_dotenv()
 
 def process_embedding(id, entity_type, embedding_vector):
@@ -29,10 +31,12 @@ def get_embedding(input):
         Receiving embedding from embedding model
     """
 
+    MODEL_NAME = "gemini-embedding-2"
+
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
     result = client.models.embed_content(
-        model="gemini-embedding-2",
+        model=MODEL_NAME,
         contents=input
     )
 

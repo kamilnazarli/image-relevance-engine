@@ -7,6 +7,7 @@ from google import genai
 from google.genai import types
 import re
 from .schemas import GuardDecision
+from .log_ai_usage import log_cost
 
 load_dotenv()
 
@@ -60,9 +61,11 @@ def llm_guard(post_data, img_data):
         - Attributes: {img_data.get('attributes')}
 
 """
+    MODEL_NAME = "gemini-2.5-flash"
+    
     try:
         interaction = client.interactions.create(
-            model="gemini-3.8-flash",
+            model=MODEL_NAME,
             system_instruction=SYSTEM_PROMPT,
             input=PROMPT,
             response_format={
@@ -71,9 +74,11 @@ def llm_guard(post_data, img_data):
                 "schema": GuardDecision.model_json_schema()
             }
         )
-        print(interaction.output_text)
+
+        # Loggin the cost of AI call
+        log_cost(interaction.usage, MODEL_NAME, "LLM_guard")
+
         clean_response = clean_json_response(interaction.output_text)
-        print(clean_response)
         return json.loads(clean_response)
 
     except Exception as e:
@@ -95,7 +100,7 @@ def get_most_similar_images(target_id):
             cur.execute("""SELECT embedding_vector FROM embeddings
                            WHERE entity_id=%s AND
                            entity_type='post'
-                           """, (target_id,))
+                        """, (target_id,))
             row = cur.fetchone()
             if not row:
                 return [], {}

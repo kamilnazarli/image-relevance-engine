@@ -49,7 +49,6 @@ def analyze_images():
                         (image_id, subject, category, json.dumps(attributes), caption, confidence))
                     conn.commit()
 
-                #  !!! FILL THE AI_COST_LOGS TABLE TOO
 
 if __name__ == "__main__":
     analyze_images()
