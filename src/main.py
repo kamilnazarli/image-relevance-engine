@@ -26,8 +26,6 @@ async def get_recommendation(post: Post):
         with conn.cursor() as cur:
             cur.execute("""INSERT INTO posts (title, content, target_subject)
                            VALUES (%s, %s, %s)
-                           ON CONFLICT (title) DO UPDATE
-                           SET title = EXCLUDED.title
                            RETURNING id;""",
                            (post.title, post.content, post.target_subject))
             post_id = cur.fetchone()[0]
@@ -48,7 +46,6 @@ async def get_recommendation(post: Post):
 
             cur.execute("""SELECT (file_path, source_url) FROM images WHERE id = %s""",
                             (img_id,))
-            conn.commit()
 
             recommended_file_path, recommended_img_url = cur.fetchone()[0]
 

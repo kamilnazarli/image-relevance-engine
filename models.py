@@ -53,7 +53,7 @@ class Post(Base):
     __tablename__ = "posts"
 
     id = mapped_column(Integer, primary_key=True)
-    title: Mapped[str] = mapped_column(String, unique=True)
+    title: Mapped[str] = mapped_column(String, index=True)
     content: Mapped[str] = mapped_column(Text)
     target_subject: Mapped[str]
 
