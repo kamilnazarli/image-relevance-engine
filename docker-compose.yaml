@@ -1,6 +1,8 @@
 services:
   my_app:
     build: .
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     environment:
@@ -10,7 +12,7 @@ services:
         condition: service_healthy
   
   db:
-    image: postgres
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_DB: image-relevance
       POSTGRES_USER: postgres
