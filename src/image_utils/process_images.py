@@ -52,3 +52,4 @@ def analyze_images():
 
 if __name__ == "__main__":
     analyze_images()
+    print("All images analyzed successfully!")

@@ -38,6 +38,9 @@ async def get_recommendation(post: Post):
             process_embedding(post_id, "post", post_embedding)
 
             top_metadata, sorted_similarity_scores = get_most_similar_images(post_id)
+
+            print(top_metadata)
+
             post_id, img_id, top_candidate_img_id, similarity_score, status, reason = (
                 mismatch_guard(post_id, top_metadata, sorted_similarity_scores))
 

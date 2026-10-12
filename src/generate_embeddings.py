@@ -59,3 +59,4 @@ def process_embeddings():
 
 if __name__ == "__main__":
     process_embeddings()
+    print("Embeddings generated successfully!")

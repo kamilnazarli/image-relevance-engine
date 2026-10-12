@@ -109,18 +109,14 @@ def get_most_similar_images(target_id):
             cur.execute("""SELECT entity_id, embedding_vector FROM embeddings
                            WHERE entity_type='image'""")
             img_embeddings = cur.fetchall()
-            print(img_embeddings)
 
             similarity_scores = {}
             for img_id, img_embedding in img_embeddings:
-                print(post_embedding)
 
                 sim = 1 - cosine(post_embedding, img_embedding)
                 similarity_scores.update({img_id: sim})
 
             sorted_similarity_scores = dict(sorted(similarity_scores.items(), key=lambda item: item [1], reverse=True))
-
-            print(f"Sorted similarity scores: {sorted_similarity_scores}")
 
             # fetching TOP 3 highest-scores image metadata
             top3_ids  = [img_id for img_id, _ in  list(sorted_similarity_scores.items())[:3]]
