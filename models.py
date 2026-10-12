@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from typing import Optional
 
 from sqlalchemy import create_engine, text, inspect
-from sqlalchemy import Integer, UniqueConstraint
+from sqlalchemy import Integer
 from sqlalchemy import Float
 from sqlalchemy import ARRAY
 from sqlalchemy import func
@@ -39,15 +39,10 @@ class ImageMetadata(Base):
     attributes: Mapped[list[str]] = mapped_column(JSONB)
     caption: Mapped[str] = mapped_column(Text)
     confidence: Mapped[float]
-    status: Mapped[str] = mapped_column(server_default="approved")
+    status: Mapped[str] = mapped_column(default="approved")
 
 class Embeddings(Base):
     __tablename__ = "embeddings"
-
-    __table_args__ = (
-        UniqueConstraint(
-            "entity_id", "entity_type", name="uq_embeddings_entity"
-        ),)
 
     id = mapped_column(Integer, primary_key=True)
     entity_id: Mapped[Optional[int]] = mapped_column(Integer, index=True)
