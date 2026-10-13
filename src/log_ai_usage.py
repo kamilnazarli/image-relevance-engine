@@ -21,11 +21,6 @@ PRICING = {
     }
 }
 
-SYSTEM_PROMPT = """
-    You are an image analysis engine. Return only the requested structured fields.
-    Keep captions concise (under 30 words) and attribute tags to short 1-2 word descriptors.
-    Be direct and do not include conversational preamble or markdown code blocks.
-"""
 
 def calculate_cost(usage, model_name):
 
