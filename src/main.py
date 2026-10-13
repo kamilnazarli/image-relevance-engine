@@ -47,12 +47,11 @@ async def get_recommendation(post: Post):
             if img_id is None:
                 return reason
 
+            # to get the path and url of recommended image
             cur.execute("""SELECT (file_path, source_url) FROM images WHERE id = %s""",
                             (img_id,))
-
             recommended_file_path, recommended_img_url = cur.fetchone()[0]
 
-
-            return f"""Recommended image file path: {recommended_file_path}, 
-                       source_url: {recommended_img_url}. 
+            return f"""Post id: {post_id}, 
+                       Source url of recommended image: {recommended_img_url}. 
                        {reason}"""
