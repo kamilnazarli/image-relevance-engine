@@ -21,7 +21,6 @@ SYSTEM_PROMPT = """
     Be direct and do not include conversational preamble or markdown code blocks.
 """
 
-MODEL_NAME = "gemini-2.5-flash"
 
 def llm_default_response():
 
@@ -47,6 +46,8 @@ def analyze_image(image_path):
     if os.getenv("LLM_STUB").lower() in ["true", "1", "yes"]:
         return llm_default_response(), " "
 
+    model_name = "gemini-2.5-flash"
+
     try:
         client = genai.Client(
             api_key=os.getenv("GEMINI_API_KEY"),
@@ -55,7 +56,7 @@ def analyze_image(image_path):
             ))
 
         interaction = client.interactions.create(
-            model=MODEL_NAME,
+            model=model_name,
             input=[
                 {
                     "type": "text", "text": SYSTEM_PROMPT
@@ -74,7 +75,7 @@ def analyze_image(image_path):
         )
         usage = interaction.usage
 
-        log_cost(usage, MODEL_NAME, "image_analysis")
+        log_cost(usage, model_name, "image_analysis")
 
     
         return (ImageAnaylsisResult.model_validate_json(interaction.output_text),
@@ -85,8 +86,10 @@ def analyze_image(image_path):
 
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+        model_name = "qwen/qwen3.8-27b"
+
         completion = client.chat.completions.create(
-            model="qwen/qwen3.8-27b",
+            model=model_name,
             messages=[
                 {
                     "role": "user",
@@ -115,6 +118,9 @@ def analyze_image(image_path):
 
         )
         usage = completion.usage
+        log_cost(usage, model_name, "image_analysis")
+        
+
         output = completion.choices[0].message.content
 
         return (ImageAnaylsisResult.model_validate_json(output),

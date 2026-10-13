@@ -7,19 +7,28 @@ load_dotenv()
 
 PRICING = {
     "gemini-2.5-flash":{
+        "provider": "gemini",
         "input": {"text": 0.30, "image": 0.30},
         "output": 2.5
     },
     "gemini-3.8-flash":{
+        "provider": "gemini",
         "input": {"text": 1.50, "image": 1.50},
         "output": 3.75
     },
     "gemini-embedding-2": {
+        "provider": "gemini",
         "input": {"text": 0.20, "image": 0.45},
         "output": 0
-
+    },
+    "qwen/qwen3.8-27b": {
+        "provider": "groq",
+        "input": {"text": 0.80, "image": 0.80},
+        "output": 4
     }
+
 }
+
 
 
 def calculate_cost(usage, model_name):
@@ -55,9 +64,37 @@ def calculate_cost(usage, model_name):
     return prompt_tokens, completion_tokens, total_cost_usd
 
 
+
+def calculate_cost_groq(usage, model_name):
+    print(usage)    
+    print(type(usage))
+
+    prompt_tokens = usage.prompt_tokens
+    completion_tokens = usage.completion_tokens
+
+    model_pricing = PRICING[model_name]
+
+    output_price = model_pricing["output"]
+
+    input_cost = 0
+    
+    input_price = model_pricing["input"]["text"]
+
+    input_cost += prompt_tokens * input_price / 1_000_000
+
+    output_cost = completion_tokens * output_price / 1_000_000
+    total_cost_usd = input_cost + output_cost
+
+    return prompt_tokens, completion_tokens, total_cost_usd
+
+
 def log_cost(usage, model_name, called_type):
 
-    prompt_tokens, completion_tokens, total_cost_usd = calculate_cost(usage, model_name)
+    if PRICING[model_name]["provider"] == "groq":
+        prompt_tokens, completion_tokens, total_cost_usd = calculate_cost_groq(usage, model_name)
+    
+    if PRICING[model_name]["provider"] == "gemini":
+        prompt_tokens, completion_tokens, total_cost_usd = calculate_cost(usage, model_name)
 
     try:
         with psycopg.connect(host=os.getenv("DB_HOST"),
@@ -78,4 +115,3 @@ def log_cost(usage, model_name, called_type):
 
     except Exception as e:
         print(f"An error occured: {e}")
-
