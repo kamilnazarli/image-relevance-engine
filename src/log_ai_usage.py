@@ -108,7 +108,7 @@ def log_cost(usage, model_name, called_type):
                                             completion_tokens, cost_usd)
                     VALUES(%s, %s, %s, %s, %s)""",
                     (model_name, called_type, prompt_tokens,
-                    completion_tokens, total_cost_usd))
+                    completion_tokens, round(total_cost_usd, 2)))
                 conn.commit()
 
         print("AI cost logged successfully!")
