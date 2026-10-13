@@ -16,7 +16,8 @@ def process_embeddings():
                          password=os.getenv("DB_PASSWORD")) as conn:
         with conn.cursor() as cur:
         
-            # Embed image captions
+            # Embed image captions and we dont need "default" fallbacks
+            # being evaluated by AI as it costs additionally.
             res = cur.execute("""SELECT * FROM image_metadata
                               WHERE caption != 'default'
                                     AND image_id NOT IN
