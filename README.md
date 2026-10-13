@@ -131,12 +131,12 @@ python -m src.generate_embeddings
 
 Start the FastAPI with Uvicorn:
 ```bash
-uvicorn src.main:app --reload --port 8000
+uvicorn src.main:app --reload --port 3000
 ```
 
 Interactive documentation is available at:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger UI: http://localhost:3000/docs
+- ReDoc: http://localhost:3000/redoc
 
 ## API documentation
 
